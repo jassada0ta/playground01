@@ -1,1 +1,1 @@
-import "./virtual-joystick/joy-button.js";
+import "./firstgame.js";
