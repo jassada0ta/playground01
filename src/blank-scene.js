@@ -16,7 +16,7 @@ class MainScene extends Phaser.Scene {
         outText.setShadow(1, 1, "#000000", 2);
         this.outText = outText;
     }
-}
+} 
 
 window.customElements.define(
     "phaser-screen",
