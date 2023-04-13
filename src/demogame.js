@@ -5,47 +5,48 @@ class MainScene extends Phaser.Scene {
         super();
         this.outText = null;
         this.joyStick = null;
-        this.isDumpjoyStick = false;
+        this.isDumpjoyStick = true;
     }
 
     dumpJoyStickState() {
         var cursorKeys = this.joyStick.createCursorKeys();
         var s = "Key down: ";
-        for (var name in cursorKeys) {
-            if (cursorKeys[name].isDown) {
-                s += `${name} `;
+        if (this.isDumpjoyStick) {
+            for (var name in cursorKeys) {
+                if (cursorKeys[name].isDown) {
+                    s += `${name} `;
+                }
             }
-        }
 
-        s += `
+            s += `
 Force: ${Math.floor(this.joyStick.force * 100) / 100}
 Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
 `;
 
-        s += "\nTimestamp:\n";
-        for (var name in cursorKeys) {
-            var key = cursorKeys[name];
-            s += `${name}: duration=${key.duration / 1000}\n`;
+            s += "\nTimestamp:\n";
+            for (var name in cursorKeys) {
+                var key = cursorKeys[name];
+                s += `${name}: duration=${key.duration / 1000}\n`;
+            }
         }
-
+        else {
+            s = "";
+        }
         this.outText.setText(s);
     }
 
     preload() {
-        this.load.plugin('rexvirtualjoystickplugin', '/lib/phaser-plugins/rexvirtualjoystickplugin.min.js', true);
+        this.load.plugin(
+            'rexvirtualjoystickplugin',
+            '/lib/phaser-plugins/rexvirtualjoystickplugin.min.js',
+            true);
+        this.load.plugin(
+            'rexbuttonplugin',
+            '/lib/phaser-plugins/rexbuttonplugin.min.js',
+            true);
     }
 
-    create() {
-        this.cameras.main.setBounds(0, 0, 2048, 2048);
-
-        this.cameras.main.setZoom(1);
-        this.cameras.main.centerOn(0, 0);
-        const outText = this.add.text(10, 10)
-            .setText("Demo game")
-            .setScrollFactor(0);
-        outText.setShadow(1, 1, "#000000", 2);
-        this.outText = outText;
-
+    setupJoyStick() {
         this.joyStick = this.plugins
             .get("rexvirtualjoystickplugin")
             .add(this, {
@@ -65,8 +66,31 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
             .on("pointerup", function () {
                 console.log("pointerup");
             });
-        this.dumpJoyStickState();
+    }
 
+    setupButtons() {
+        var sprite = this.add.circle(775, 15, 10, 0xdddddd);
+        this.input.addPointer(1);
+        var btn = this.plugins.get('rexbuttonplugin').add(sprite);
+        btn.on('click',  ()=> {
+            this.isDumpjoyStick = !this.isDumpjoyStick;
+            this.dumpJoyStickState();
+        })
+    }
+
+    create() {
+        this.cameras.main.setBounds(0, 0, 2048, 2048);
+
+        this.cameras.main.setZoom(1);
+        this.cameras.main.centerOn(0, 0);
+        const outText = this.add.text(10, 10)
+            .setText("Demo game")
+            .setScrollFactor(0);
+        outText.setShadow(1, 1, "#000000", 2);
+        this.outText = outText;
+        this.setupJoyStick();
+        this.setupButtons();
+        this.dumpJoyStickState();
     }
 
     update() {
@@ -105,7 +129,6 @@ window.customElements.define(
             };
 
             const game = new Phaser.Game(config);
-            alert("test");
         }
     }
 );
