@@ -6,6 +6,7 @@ class MainScene extends Phaser.Scene {
         this.outText = null;
         this.joyStick = null;
         this.isDumpjoyStick = true;
+        this.player = null;
     }
 
     dumpJoyStickState() {
@@ -44,6 +45,23 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
             'rexbuttonplugin',
             '/lib/phaser-plugins/rexbuttonplugin.min.js',
             true);
+
+        this.load.spritesheet(
+            'player',
+            'assets/demo-game/player.png',
+            { frameWidth: 32, frameHeight: 32 },
+        );
+        this.load.spritesheet('dude', 'assets/firstgame/dude.png', { frameWidth: 32, frameHeight: 48 });
+        
+        this.load.image('sky', 'assets/firstgame/sky.png');
+    }
+
+    setupPlayer() {
+        const player = this.physics.add.sprite(400, 300, 'player');
+
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+        this.player = player;
     }
 
     setupJoyStick() {
@@ -72,13 +90,14 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         var sprite = this.add.circle(775, 15, 10, 0xdddddd);
         this.input.addPointer(1);
         var btn = this.plugins.get('rexbuttonplugin').add(sprite);
-        btn.on('click',  ()=> {
+        btn.on('click', () => {
             this.isDumpjoyStick = !this.isDumpjoyStick;
             this.dumpJoyStickState();
         })
     }
 
     create() {
+        this.add.image(400, 300, 'sky');
         this.cameras.main.setBounds(0, 0, 2048, 2048);
 
         this.cameras.main.setZoom(1);
@@ -90,6 +109,7 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         this.outText = outText;
         this.setupJoyStick();
         this.setupButtons();
+        this.setupPlayer();
         this.dumpJoyStickState();
     }
 
@@ -121,7 +141,7 @@ window.customElements.define(
                 physics: {
                     default: 'arcade',
                     arcade: {
-                        gravity: { y: 300 },
+                        gravity: { y: 0 },
                         debug: false
                     }
                 },
