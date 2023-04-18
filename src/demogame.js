@@ -52,7 +52,7 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
             { frameWidth: 32, frameHeight: 32 },
         );
         this.load.spritesheet('dude', 'assets/firstgame/dude.png', { frameWidth: 32, frameHeight: 48 });
-        
+
         this.load.image('sky', 'assets/firstgame/sky.png');
     }
 
@@ -114,6 +114,24 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
     }
 
     update() {
+        var cursors = this.joyStick.createCursorKeys();
+        var player = this.player;
+
+        if (cursors.left.isDown) {
+            player.setVelocityX(-160);
+
+            player.anims.play('left', true);
+        }
+        else if (cursors.right.isDown) {
+            player.setVelocityX(160);
+
+            player.anims.play('right', true);
+        }
+        else {
+            player.setVelocityX(0);
+
+            player.anims.play('turn');
+        }
 
     }
 }
