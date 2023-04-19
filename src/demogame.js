@@ -61,6 +61,26 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
 
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('player', { start: 3, end: 4 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'turn',
+            frames: [ { key: 'player', frame: 2 } ],
+            frameRate: 20
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
         this.player = player;
     }
 
@@ -116,14 +136,15 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
     update() {
         var cursors = this.joyStick.createCursorKeys();
         var player = this.player;
+        const force = Math.floor(this.joyStick.force * 100) / 100;
 
         if (cursors.left.isDown) {
-            player.setVelocityX(-160);
+            player.setVelocityX(-force);
 
             player.anims.play('left', true);
         }
         else if (cursors.right.isDown) {
-            player.setVelocityX(160);
+            player.setVelocityX(force);
 
             player.anims.play('right', true);
         }
