@@ -48,8 +48,8 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
 
         this.load.spritesheet(
             'player',
-            'assets/demo-game/player.png',
-            { frameWidth: 32, frameHeight: 32 },
+            'assets/demo-game/player2.png',
+            { frameWidth: 32, frameHeight: 48 },
         );
         this.load.spritesheet('dude', 'assets/firstgame/dude.png', { frameWidth: 32, frameHeight: 48 });
 
@@ -62,23 +62,16 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
         this.anims.create({
-            key: 'left',
-            frames: this.anims.generateFrameNumbers('player', { start: 3, end: 4 }),
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', { start: 1, end: 10 }),
             frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
-            key: 'turn',
-            frames: [ { key: 'player', frame: 2 } ],
+            key: 'idle',
+            frames: [{ key: 'player', frame: 0 }],
             frameRate: 20
-        });
-
-        this.anims.create({
-            key: 'right',
-            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
-            frameRate: 10,
-            repeat: -1
         });
 
         this.player = player;
@@ -91,8 +84,8 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
                 x: 120,
                 y: 480,
                 radius: 100,
-                base: this.add.circle(0, 0, 100, 0x888888),
-                thumb: this.add.circle(0, 0, 50, 0xcccccc),
+                base: this.add.circle(0, 0, 100, 0x888888, 0.4),
+                thumb: this.add.circle(0, 0, 50, 0xcccccc, 0.6),
                 dir: '4dir',   // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
                 // forceMin: 16,
                 // enable: true
@@ -136,22 +129,25 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
     update() {
         var cursors = this.joyStick.createCursorKeys();
         var player = this.player;
-        const force = Math.floor(this.joyStick.force * 100) / 100;
+        //const force = Math.floor(this.joyStick.force * 100) / 100;
+        const forceX = Math.floor(this.joyStick.forceX * 100) / 100;
+        const forceY = Math.floor(this.joyStick.forceY * 100) / 100;
 
-        if (cursors.left.isDown) {
-            player.setVelocityX(-force);
-
-            player.anims.play('left', true);
-        }
-        else if (cursors.right.isDown) {
-            player.setVelocityX(force);
-
-            player.anims.play('right', true);
-        }
-        else {
+        if (cursors.left.isDown || cursors.right.isDown
+            || cursors.up.isDown || cursors.down.isDown) {
+            player.setVelocityX(forceX);
+            player.setVelocityY(forceY);
+            player.anims.play('walk', true);
+        } else {
             player.setVelocityX(0);
+            player.setVelocityY(0);
+            player.anims.play('idle');
+        }
 
-            player.anims.play('turn');
+        if (forceX < 0) {
+            player.setFlipX(false);
+        } else if (forceX > 0) {
+            player.setFlipX(true);
         }
 
     }
