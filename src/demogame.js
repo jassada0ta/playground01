@@ -5,14 +5,15 @@ class MainScene extends Phaser.Scene {
         super();
         this.outText = null;
         this.joyStick = null;
-        this.isDumpjoyStick = true;
+        this.isShowDebug = true;
         this.player = null;
+        this.punching = false;
     }
 
-    dumpJoyStickState() {
+    updateDebugData() {
         var cursorKeys = this.joyStick.createCursorKeys();
         var s = "Key down: ";
-        if (this.isDumpjoyStick) {
+        if (this.isShowDebug) {
             for (var name in cursorKeys) {
                 if (cursorKeys[name].isDown) {
                     s += `${name} `;
@@ -33,6 +34,7 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         else {
             s = "";
         }
+        s += "\nPunch:" + this.punching + "\n";
         this.outText.setText(s);
     }
 
@@ -51,7 +53,6 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
             'assets/demo-game/player2.png',
             { frameWidth: 32, frameHeight: 48 },
         );
-        this.load.spritesheet('dude', 'assets/firstgame/dude.png', { frameWidth: 32, frameHeight: 48 });
 
         this.load.image('sky', 'assets/firstgame/sky.png');
     }
@@ -61,11 +62,19 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
 
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
+
         this.anims.create({
             key: 'walk',
             frames: this.anims.generateFrameNumbers('player', { start: 1, end: 10 }),
             frameRate: 10,
             repeat: -1
+        });
+
+        this.anims.create({
+            key: 'punch',
+            frames: this.anims.generateFrameNumbers('player', { start: 11, end: 15 }),
+            frameRate: 15,
+            repeat: 0,
         });
 
         this.anims.create({
@@ -90,7 +99,9 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
                 // forceMin: 16,
                 // enable: true
             })
-            .on("update", this.dumpJoyStickState, this)
+            .on("update", () => {
+                this.updateDebugData();
+            }, this)
             .on("pointerdown", function () {
                 console.log("pointerdown");
             })
@@ -100,13 +111,24 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
     }
 
     setupButtons() {
-        var sprite = this.add.circle(775, 15, 10, 0xdddddd);
-        this.input.addPointer(1);
-        var btn = this.plugins.get('rexbuttonplugin').add(sprite);
-        btn.on('click', () => {
-            this.isDumpjoyStick = !this.isDumpjoyStick;
-            this.dumpJoyStickState();
-        })
+        const scene = this;
+        const btnPlugin = scene.plugins.get('rexbuttonplugin');
+        scene.input.addPointer(1);
+
+        const toggleDebugBtnSprite = scene.add.circle(775, 15, 10, 0xdddddd);
+        const toggleDebugBtn = btnPlugin.add(toggleDebugBtnSprite);
+        toggleDebugBtn.on('click', () => {
+            scene.isShowDebug = !scene.isShowDebug;
+            scene.updateDebugData();
+        });
+
+        const atkBtnSprite = scene.add.circle(700, 500, 25, 0xff6666);
+        const atkBtn = btnPlugin.add(atkBtnSprite);
+
+        atkBtn.on('click', () => {
+            this.punching = true;
+            this.updateDebugData();
+        });
     }
 
     create() {
@@ -123,21 +145,32 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         this.setupJoyStick();
         this.setupButtons();
         this.setupPlayer();
-        this.dumpJoyStickState();
+        this.updateDebugData();
     }
 
     update() {
         var cursors = this.joyStick.createCursorKeys();
         var player = this.player;
-        //const force = Math.floor(this.joyStick.force * 100) / 100;
         const forceX = Math.floor(this.joyStick.forceX * 100) / 100;
         const forceY = Math.floor(this.joyStick.forceY * 100) / 100;
 
-        if (cursors.left.isDown || cursors.right.isDown
+        if (this.punching) {
+            if (player.anims.currentAnim.key !== 'punch') {
+                player.setVelocityX(0);
+                player.setVelocityY(0);
+                player.anims.play('punch', true);
+            } else {
+                if (!player.anims.isPlaying) {
+                    this.punching = false;
+                    this.updateDebugData();
+                }
+            }
+        } else if (cursors.left.isDown || cursors.right.isDown
             || cursors.up.isDown || cursors.down.isDown) {
             player.setVelocityX(forceX);
             player.setVelocityY(forceY);
             player.anims.play('walk', true);
+            this.punching = false;
         } else {
             player.setVelocityX(0);
             player.setVelocityY(0);
