@@ -1,72 +1,17 @@
-class PlayerSprite extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, joystick) {
-        super(scene, x, y, 'player', 0);
-        this.joystick = joystick;
-        this.punching = false;
-
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
-        this.setBounce(0.2);
-        this.setCollideWorldBounds(true);
-    }
-
-    punch() {
-        this.punching = true;
-    }
-
-    preUpdate(time, delta) {
-        super.preUpdate(time, delta);
-        const player = this;
-        const joystick = this.joystick;
-        const cursors = joystick.createCursorKeys();
-
-
-        const forceX = Math.floor(joystick.forceX * 100) / 100;
-        const forceY = Math.floor(joystick.forceY * 100) / 100;
-
-        if (this.punching) {
-            if (player.anims.currentAnim.key !== 'punch') {
-                player.setVelocityX(0);
-                player.setVelocityY(0);
-                player.anims.play('punch', true);
-            } else {
-                if (!player.anims.isPlaying) {
-                    this.punching = false;
-                    this.scene.updateDebugData();
-                }
-            }
-        } else if (cursors.left.isDown || cursors.right.isDown
-            || cursors.up.isDown || cursors.down.isDown) {
-            player.setVelocityX(forceX);
-            player.setVelocityY(forceY);
-            player.anims.play('walk', true);
-            this.punching = false;
-        } else {
-            player.setVelocityX(0);
-            player.setVelocityY(0);
-            player.anims.play('idle');
-        }
-
-        if (forceX < 0) {
-            player.setFlipX(false);
-        } else if (forceX > 0) {
-            player.setFlipX(true);
-        }
-    }
-}
+import { PlayerSprite } from "./player.js";
 
 class MainScene extends Phaser.Scene {
     constructor() {
         super();
         this.outText = null;
-        this.joyStick = null;
+        this.joystick = null;
         this.atkButton = null;
         this.isShowDebug = true;
         this.player = null;
     }
 
     updateDebugData() {
-        var cursorKeys = this.joyStick.createCursorKeys();
+        var cursorKeys = this.joystick.createCursorKeys();
         var s = "Key down: ";
         if (this.isShowDebug) {
             for (var name in cursorKeys) {
@@ -76,8 +21,8 @@ class MainScene extends Phaser.Scene {
             }
 
             s += `
-Force: ${Math.floor(this.joyStick.force * 100) / 100}
-Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
+Force: ${Math.floor(this.joystick.force * 100) / 100}
+Angle: ${Math.floor(this.joystick.angle * 100) / 100}
 `;
 
             s += "\nTimestamp:\n";
@@ -114,7 +59,7 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
 
     setupPlayer() {
 
-        const player = new PlayerSprite(this, 400, 300, this.joyStick);
+        const player = new PlayerSprite(this, 400, 300, this.joystick);
 
         this.anims.create({
             key: 'walk',
@@ -139,8 +84,8 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
         this.player = player;
     }
 
-    setupJoyStick() {
-        this.joyStick = this.plugins
+    setupJoystick() {
+        this.joystick = this.plugins
             .get("rexvirtualjoystickplugin")
             .add(this, {
                 x: 120,
@@ -197,7 +142,7 @@ Angle: ${Math.floor(this.joyStick.angle * 100) / 100}
             .setScrollFactor(0);
         outText.setShadow(1, 1, "#000000", 2);
         this.outText = outText;
-        this.setupJoyStick();
+        this.setupJoystick();
         this.setupButtons();
         this.setupPlayer();
         this.updateDebugData();

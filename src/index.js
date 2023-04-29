@@ -1,1 +1,1 @@
-import "./demogame.js";
+import "./demo-game/demogame.js";
