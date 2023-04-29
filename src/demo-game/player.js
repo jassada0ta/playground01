@@ -8,10 +8,21 @@ export class PlayerSprite extends Phaser.Physics.Arcade.Sprite {
         scene.physics.add.existing(this);
         this.setBounce(0.2);
         this.setCollideWorldBounds(true);
+
+        this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+            if (this.punching) {
+                this.punching = false;
+                this.scene.updateDebugData();
+            }
+        }, this);
     }
 
     punch() {
         this.punching = true;
+        this.setVelocityX(0);
+        this.setVelocityY(0);
+        this.scene.updateDebugData();
+        this.anims.play('punch', true);
     }
 
     preUpdate(time, delta) {
@@ -25,16 +36,8 @@ export class PlayerSprite extends Phaser.Physics.Arcade.Sprite {
         const forceY = Math.floor(joystick.forceY * 100) / 100;
 
         if (this.punching) {
-            if (player.anims.currentAnim.key !== 'punch') {
-                player.setVelocityX(0);
-                player.setVelocityY(0);
-                player.anims.play('punch', true);
-            } else {
-                if (!player.anims.isPlaying) {
-                    this.punching = false;
-                    this.scene.updateDebugData();
-                }
-            }
+            player.setVelocityX(0);
+            player.setVelocityY(0);
         } else if (cursors.left.isDown || cursors.right.isDown
             || cursors.up.isDown || cursors.down.isDown) {
             player.setVelocityX(forceX);
