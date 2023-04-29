@@ -1,7 +1,6 @@
 export class PlayerSprite extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, joystick) {
+    constructor(scene, x, y) {
         super(scene, x, y, 'player', 0);
-        this.joystick = joystick;
         this.punching = false;
 
         scene.add.existing(this);
@@ -28,7 +27,7 @@ export class PlayerSprite extends Phaser.Physics.Arcade.Sprite {
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
         const player = this;
-        const joystick = this.joystick;
+        const joystick = this.scene.joystick;
         const cursors = joystick.createCursorKeys();
 
 

@@ -30,11 +30,11 @@ Angle: ${Math.floor(this.joystick.angle * 100) / 100}
                 var key = cursorKeys[name];
                 s += `${name}: duration=${key.duration / 1000}\n`;
             }
+            s += "\nPunch:" + this.player.punching + "\n";
         }
         else {
             s = "";
         }
-        s += "\nPunch:" + this.player.punching + "\n";
         this.outText.setText(s);
     }
 
@@ -142,9 +142,9 @@ Angle: ${Math.floor(this.joystick.angle * 100) / 100}
             .setScrollFactor(0);
         outText.setShadow(1, 1, "#000000", 2);
         this.outText = outText;
+        this.setupPlayer();
         this.setupJoystick();
         this.setupButtons();
-        this.setupPlayer();
         this.updateDebugData();
     }
 
@@ -177,7 +177,7 @@ window.customElements.define(
                     default: 'arcade',
                     arcade: {
                         gravity: { y: 0 },
-                        debug: false
+                        debug: true
                     }
                 },
                 scene: MainScene
